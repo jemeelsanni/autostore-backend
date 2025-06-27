@@ -56,13 +56,8 @@ const corsOptions = {
         if (!origin)
             return callback(null, true);
         const allowedOrigins = [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'http://127.0.0.1:3000',
-            'http://127.0.0.1:3001',
-            'https://your-frontend-domain.vercel.app',
-            'https://your-frontend-domain.netlify.app',
-            'https://jajiautos.ng'
+            'https://jajiautos-frontend.vercel.app',
+            
         ];
         if (process.env.NODE_ENV === 'production') {
             if (allowedOrigins.includes(origin)) {

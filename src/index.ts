@@ -60,11 +60,6 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001', 
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      // Add your production frontend URLs here
       'https://jajiautos-frontend.vercel.app'
     ];
     
