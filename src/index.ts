@@ -65,9 +65,7 @@ const corsOptions = {
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001',
       // Add your production frontend URLs here
-      'https://your-frontend-domain.vercel.app',
-      'https://your-frontend-domain.netlify.app',
-      'https://jajiautos.ng'
+      'https://jajiautos-frontend.vercel.app'
     ];
     
     // In production, be more strict about origins
