@@ -15,11 +15,11 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:reset": "prisma migrate reset",
-    "db:seed": "ts-node prisma/seed.ts",
+    "db:seed": "ts-node src/prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:format": "prisma format",
     "db:setup": "prisma migrate deploy && prisma generate",
-    "render:build": "npm install && npx prisma db push --schema=src/prisma/schema.prisma && npx prisma generate --schema=src/prisma/schema.prisma && npm run build",
+    "render:build": "mkdir -p prisma && cp src/prisma/schema.prisma prisma/schema.prisma && npm install && npx prisma db push && npx prisma generate && npm run build",
     "render:start": "npm start",
     "docker:build": "docker build -t jajiautos-backend .",
     "docker:run": "docker run -p 3000:3000 jajiautos-backend",
@@ -43,7 +43,7 @@
     "npm": ">=8.0.0"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node src/prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
@@ -52,7 +52,6 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.13",
-    "@types/node": "^24.0.1",
     "@types/streamifier": "^0.1.2",
     "@types/uuid": "^10.0.0",
     "bcryptjs": "^2.4.3",
@@ -68,6 +67,7 @@
     "zod": "^3.25.64"
   },
   "devDependencies": {
+    "@types/node": "^24.0.4",
     "nodemon": "^3.1.10",
     "prisma": "^6.9.0",
     "ts-node": "^10.9.2",
