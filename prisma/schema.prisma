@@ -1,0 +1,200 @@
+// prisma/schema.prisma - Updated schema with image support and improvements
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  password     String
+  firstName    String
+  lastName     String
+  role         Role     @default(SALES_PERSONNEL)
+  isActive     Boolean  @default(true)
+  profileImage String? // Added for profile picture uploads
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  sales   Sale[]
+  cars    Car[]
+  reviews Review[]
+
+  @@map("users")
+}
+
+model Car {
+  id             String   @id @default(cuid())
+  name           String
+  brand          String
+  model          String
+  price          Float
+  originalPrice  Float?
+  images         String[]
+  category       String
+  year           Int
+  mileage        Int      @default(0)
+  fuel           String
+  transmission   String
+  engine         String?
+  horsepower     Int?
+  torque         String?
+  acceleration   String?
+  topSpeed       String?
+  fuelEconomy    String?
+  drivetrain     String?
+  exteriorColor  String?
+  interiorColor  String?
+  vin            String?
+  description    String
+  features       String[]
+  safetyFeatures String[]
+  warranty       String?
+  featured       Boolean  @default(false)
+  inStock        Int      @default(0)
+  isNew          Boolean  @default(true)
+  dealType       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations - Make addedBy optional
+  sales      Sale[]
+  reviews    Review[]
+  addedBy    User?       @relation(fields: [addedById], references: [id])
+  addedById  String? // Make this optional with ?
+  testDrives TestDrive[]
+
+  @@map("cars")
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  amount        Float
+  status        SaleStatus @default(PENDING) // Changed default to PENDING
+  paymentMethod String
+  notes         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Relations
+  car           Car    @relation(fields: [carId], references: [id], onDelete: Restrict) // Prevent deletion of cars with sales
+  carId         String
+  salesperson   User   @relation(fields: [salespersonId], references: [id])
+  salespersonId String
+
+  @@map("sales")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      @db.SmallInt
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  car    Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carId  String
+  user   User   @relation(fields: [userId], references: [id]) // Changed from reviewerId for consistency
+  userId String
+
+  @@map("reviews")
+}
+
+model TestDrive {
+  id            String          @id @default(cuid())
+  customerName  String
+  customerEmail String
+  customerPhone String
+  scheduledDate DateTime // Combined date and time into one field
+  status        TestDriveStatus @default(SCHEDULED)
+  notes         String? // Changed from message for consistency
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  // Relations
+  car   Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carId String
+
+  @@map("test_drives")
+}
+
+// New model for tracking uploaded images
+model Image {
+  id           String   @id @default(cuid())
+  filename     String   @unique
+  originalName String
+  url          String
+  size         Int // File size in bytes
+  mimeType     String
+  folder       String   @default("general") // cars, users, temp, etc.
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("images")
+}
+
+// New model for application settings
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string") // string, number, boolean, json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// New model for audit logs
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String // CREATE, UPDATE, DELETE, LOGIN, etc.
+  entity    String // Car, User, Sale, etc.
+  entityId  String? // ID of the affected entity
+  userId    String? // User who performed the action
+  details   Json? // Additional details about the action
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// Enhanced enums
+enum Role {
+  SUPER_ADMIN
+  SALES_PERSONNEL
+  INVENTORY_MANAGER
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum TestDriveStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum CarStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  MAINTENANCE
+  DISCONTINUED
+}
