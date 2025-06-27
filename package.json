@@ -1,12 +1,13 @@
 {
-  "name": "autostore-backend",
+  "name": "jajiautos-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Jaji Autos - Car Dealership Management System API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc",
+    "build": "npm run db:generate && tsc",
     "start": "node dist/index.js",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -16,12 +17,35 @@
     "db:migrate:reset": "prisma migrate reset",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:format": "prisma format"
+    "db:format": "prisma format",
+    "db:setup": "prisma migrate deploy && prisma generate",
+    "render:build": "npm install && npm run db:setup && npm run build",
+    "render:start": "npm start",
+    "docker:build": "docker build -t jajiautos-backend .",
+    "docker:run": "docker run -p 3000:3000 jajiautos-backend",
+    "lint": "echo 'Linting not configured'",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "prisma": {
+    "schema": "src/prisma/schema.prisma",
+    "seed": "ts-node src/prisma/seed.ts"
+  },
+  "keywords": [
+    "car-dealership",
+    "inventory-management",
+    "sales-tracking",
+    "nodejs",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "Jaji Autos Team",
+  "license": "MIT",
   "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "bcryptjs": "^2.4.3",
@@ -42,7 +66,7 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.13",
-    "@types/node": "^24.0.1",
+    "@types/node": "^24.0.4",
     "@types/streamifier": "^0.1.2",
     "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.10",

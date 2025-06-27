@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role, SaleStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -19,7 +19,7 @@ async function main() {
       password: hashedPassword,
       firstName: 'Super',
       lastName: 'Admin',
-      role: 'SUPER_ADMIN'
+      role: Role.SUPER_ADMIN
     }
   });
 
@@ -33,7 +33,7 @@ async function main() {
       password: await bcrypt.hash('sales123', 10),
       firstName: 'John',
       lastName: 'Doe',
-      role: 'SALES_PERSONNEL'
+      role: Role.SALES_PERSONNEL
     }
   });
 
@@ -47,7 +47,7 @@ async function main() {
       password: await bcrypt.hash('inventory123', 10),
       firstName: 'Jane',
       lastName: 'Smith',
-      role: 'INVENTORY_MANAGER'
+      role: Role.INVENTORY_MANAGER
     }
   });
 
@@ -285,7 +285,38 @@ async function main() {
   // Create cars
   for (const carData of carsData) {
     await prisma.car.create({
-      data: carData
+      data: {
+        name: carData.name,
+        brand: carData.brand,
+        model: carData.model,
+        price: carData.price,
+        originalPrice: carData.originalPrice,
+        images: carData.images,
+        category: carData.category,
+        year: carData.year,
+        mileage: carData.mileage,
+        fuel: carData.fuel,
+        transmission: carData.transmission,
+        engine: carData.engine,
+        horsepower: carData.horsepower,
+        torque: carData.torque,
+        acceleration: carData.acceleration,
+        topSpeed: carData.topSpeed,
+        fuelEconomy: carData.fuelEconomy,
+        drivetrain: carData.drivetrain,
+        exteriorColor: carData.exteriorColor,
+        interiorColor: carData.interiorColor,
+        vin: carData.vin,
+        description: carData.description,
+        features: carData.features,
+        safetyFeatures: carData.safetyFeatures,
+        warranty: carData.warranty,
+        featured: carData.featured,
+        inStock: carData.inStock,
+        isNew: carData.isNew,
+        dealType: carData.dealType,
+        addedById: carData.addedById
+      }
     });
   }
 
@@ -299,7 +330,7 @@ async function main() {
       customerEmail: 'ahmed.ibrahim@email.com',
       customerPhone: '+234 803 123 4567',
       amount: cars[0].price,
-      status: 'COMPLETED' as const,
+      status: SaleStatus.COMPLETED,
       paymentMethod: 'Bank Transfer',
       notes: 'Customer requested extended warranty',
       salespersonId: salesPerson.id
@@ -310,7 +341,7 @@ async function main() {
       customerEmail: 'fatima.okafor@email.com',
       customerPhone: '+234 805 987 6543',
       amount: cars[1].price,
-      status: 'COMPLETED' as const,
+      status: SaleStatus.COMPLETED,
       paymentMethod: 'Card',
       notes: 'Financing arrangement completed',
       salespersonId: salesPerson.id
@@ -321,7 +352,7 @@ async function main() {
       customerEmail: 'chinedu.okwu@email.com',
       customerPhone: '+234 807 456 7890',
       amount: cars[2].price,
-      status: 'PENDING' as const,
+      status: SaleStatus.PENDING,
       paymentMethod: 'Financing',
       notes: 'Pending final documentation',
       salespersonId: salesPerson.id
@@ -330,39 +361,49 @@ async function main() {
 
   for (const saleData of salesData) {
     await prisma.sale.create({
-      data: saleData
+      data: {
+        carId: saleData.carId,
+        customerName: saleData.customerName,
+        customerEmail: saleData.customerEmail,
+        customerPhone: saleData.customerPhone,
+        amount: saleData.amount,
+        status: saleData.status,
+        paymentMethod: saleData.paymentMethod,
+        notes: saleData.notes,
+        salespersonId: saleData.salespersonId
+      }
     });
   }
 
-  // Create sample reviews
+  // Create sample reviews (FIXED: using userId instead of reviewerId)
   const reviewsData = [
     {
       carId: cars[0].id,
-      reviewerId: superAdmin.id,
+      userId: superAdmin.id,
       rating: 5,
       comment: 'Excellent vehicle with outstanding performance and luxury features.'
     },
     {
       carId: cars[0].id,
-      reviewerId: salesPerson.id,
+      userId: salesPerson.id,
       rating: 4,
       comment: 'Great SUV, customers love the technology and comfort.'
     },
     {
       carId: cars[1].id,
-      reviewerId: inventoryManager.id,
+      userId: inventoryManager.id,
       rating: 5,
       comment: 'BMW quality and performance at its finest.'
     },
     {
       carId: cars[2].id,
-      reviewerId: superAdmin.id,
+      userId: superAdmin.id,
       rating: 4,
       comment: 'Solid luxury SUV with good value for money.'
     },
     {
       carId: cars[3].id,
-      reviewerId: salesPerson.id,
+      userId: salesPerson.id,
       rating: 5,
       comment: 'Pure sports car DNA in SUV form. Amazing performance!'
     }
@@ -370,9 +411,47 @@ async function main() {
 
   for (const reviewData of reviewsData) {
     await prisma.review.create({
-      data: reviewData
+      data: {
+        carId: reviewData.carId,
+        userId: reviewData.userId,
+        rating: reviewData.rating,
+        comment: reviewData.comment
+      }
     });
   }
+
+  // TODO: Add settings creation after Setting model migration is complete
+  // Uncomment the following code after running: npx prisma migrate dev --name add-setting-model
+  
+  /*
+  // Create sample settings for your app
+  const settingsData: Array<{
+    key: string;
+    value: string;
+    type: string;
+  }> = [
+    { key: 'company_name', value: 'Jaji Autos', type: 'string' },
+    { key: 'company_email', value: 'info@jajiautos.ng', type: 'string' },
+    { key: 'company_phone', value: '+234 803 000 0000', type: 'string' },
+    { key: 'company_address', value: 'Lagos, Nigeria', type: 'string' },
+    { key: 'featured_cars_limit', value: '6', type: 'number' },
+    { key: 'enable_test_drives', value: 'true', type: 'boolean' },
+    { key: 'currency_symbol', value: '₦', type: 'string' },
+    { key: 'tax_rate', value: '7.5', type: 'number' }
+  ];
+
+  for (const setting of settingsData) {
+    await prisma.setting.upsert({
+      where: { key: setting.key },
+      update: {},
+      create: {
+        key: setting.key,
+        value: setting.value,
+        type: setting.type
+      }
+    });
+  }
+  */
 
   console.log('✅ Database seeded successfully!');
   console.log('👤 Users created:');
@@ -382,6 +461,7 @@ async function main() {
   console.log(`🚗 Created ${carsData.length} cars`);
   console.log(`💰 Created ${salesData.length} sales`);
   console.log(`⭐ Created ${reviewsData.length} reviews`);
+  console.log(`ℹ️  Settings creation commented out - run migration first`);
 }
 
 main()
