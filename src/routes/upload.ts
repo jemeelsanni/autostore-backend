@@ -87,7 +87,8 @@ const optimizeImage = async (inputPath: string, outputPath: string) => {
 router.post('/upload/image', authenticateToken, requireRole(['INVENTORY_MANAGER', 'SUPER_ADMIN']), upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No image file provided' });
+      res.status(400).json({ error: 'No image file provided' });
+      return;
     }
 
     const originalPath = req.file.path;
@@ -121,10 +122,11 @@ router.post('/upload/image', authenticateToken, requireRole(['INVENTORY_MANAGER'
 router.post('/upload/multiple', authenticateToken, requireRole(['INVENTORY_MANAGER', 'SUPER_ADMIN']), upload.array('images', 6), async (req, res) => {
   try {
     if (!req.files || (req.files as any[]).length === 0) {
-      return res.status(400).json({ error: 'No image files provided' });
+      res.status(400).json({ error: 'No image files provided' });
+      return;
     }
 
-    const uploadedImages = [];
+    const uploadedImages: { url: string; filename: string; size: number }[] = [];
     const files = req.files as Express.Multer.File[];
 
     for (const file of files) {
@@ -361,7 +363,8 @@ router.get('/:id', async (req, res) => {
     });
 
     if (!car) {
-      return res.status(404).json({ error: 'Car not found' });
+      res.status(404).json({ error: 'Car not found' });
+      return;
     }
 
     // Calculate average rating
@@ -421,14 +424,16 @@ router.post('/', authenticateToken, requireRole(['INVENTORY_MANAGER', 'SUPER_ADM
 
     // Validate required fields
     if (!name || !brand || !model || !price || !category || !year || !description || !features || inStock === undefined) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Missing required fields: name, brand, model, price, category, year, description, features, inStock' 
       });
+      return;
     }
 
     // Validate images array
     if (!images || !Array.isArray(images) || images.length === 0) {
-      return res.status(400).json({ error: 'At least one image is required' });
+      res.status(400).json({ error: 'At least one image is required' });
+      return;
     }
 
     const carData = {
@@ -476,14 +481,14 @@ router.post('/', authenticateToken, requireRole(['INVENTORY_MANAGER', 'SUPER_ADM
     res.status(201).json(car);
 
   } catch (error) {
-    console.error('❌ Error creating car:', error);
-    
     if (typeof error === 'object' && error !== null && 'code' in error && (error as any).code === 'P2002') {
       // Unique constraint violation
-      return res.status(400).json({ error: 'A car with this name already exists' });
+      res.status(400).json({ error: 'A car with this name already exists' });
+      return;
     }
     
     res.status(500).json({ error: 'Failed to create car' });
+    return;
   }
 });
 
@@ -539,11 +544,11 @@ router.put('/:id', authenticateToken, requireRole(['INVENTORY_MANAGER', 'SUPER_A
     });
 
     console.log(`✅ Car updated successfully: ${updatedCar.name}`);
-    res.json(updatedCar);
+    return res.json(updatedCar);
 
   } catch (error) {
     console.error('❌ Error updating car:', error);
-    res.status(500).json({ error: 'Failed to update car' });
+    return res.status(500).json({ error: 'Failed to update car' });
   }
 });
 
@@ -579,11 +584,11 @@ router.delete('/:id', authenticateToken, requireRole(['INVENTORY_MANAGER', 'SUPE
     });
 
     console.log(`✅ Car deleted successfully: ${carId}`);
-    res.json({ message: 'Car deleted successfully' });
+    return res.json({ message: 'Car deleted successfully' });
 
   } catch (error) {
     console.error('❌ Error deleting car:', error);
-    res.status(500).json({ error: 'Failed to delete car' });
+    return res.status(500).json({ error: 'Failed to delete car' });
   }
 });
 
@@ -706,7 +711,8 @@ router.get('/search/query', async (req, res) => {
     const limit = parseInt(req.query.limit as string) || 10;
 
     if (!query || query.trim().length < 2) {
-      return res.status(400).json({ error: 'Search query must be at least 2 characters' });
+      res.status(400).json({ error: 'Search query must be at least 2 characters' });
+      return;
     }
 
     const cars = await prisma.car.findMany({
@@ -737,10 +743,12 @@ router.get('/search/query', async (req, res) => {
 
     console.log(`✅ Found ${cars.length} cars for search: "${query}"`);
     res.json({ cars, query });
+    return;
 
   } catch (error) {
     console.error('❌ Error searching cars:', error);
-    res.json({ cars: [], query: query }); // Return empty array as fallback
+    res.json({ cars: [], query: req.query.q }); // Return empty array as fallback
+    return;
   }
 });
 

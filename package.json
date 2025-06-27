@@ -19,17 +19,13 @@
     "db:studio": "prisma studio",
     "db:format": "prisma format",
     "db:setup": "prisma migrate deploy && prisma generate",
-    "render:build": "npm install && npm run db:setup && npm run build",
+    "render:build": "npm install && npx prisma db push --schema=src/prisma/schema.prisma && npx prisma generate --schema=src/prisma/schema.prisma && npm run build",
     "render:start": "npm start",
     "docker:build": "docker build -t jajiautos-backend .",
     "docker:run": "docker run -p 3000:3000 jajiautos-backend",
     "lint": "echo 'Linting not configured'",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean"
-  },
-  "prisma": {
-    "schema": "src/prisma/schema.prisma",
-    "seed": "ts-node src/prisma/seed.ts"
   },
   "keywords": [
     "car-dealership",
@@ -46,8 +42,19 @@
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
     "@prisma/client": "^6.9.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.13",
+    "@types/node": "^24.0.1",
+    "@types/streamifier": "^0.1.2",
+    "@types/uuid": "^10.0.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",
@@ -61,14 +68,6 @@
     "zod": "^3.25.64"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.9",
-    "@types/multer": "^1.4.13",
-    "@types/node": "^24.0.4",
-    "@types/streamifier": "^0.1.2",
-    "@types/uuid": "^10.0.0",
     "nodemon": "^3.1.10",
     "prisma": "^6.9.0",
     "ts-node": "^10.9.2",

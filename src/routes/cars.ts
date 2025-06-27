@@ -79,7 +79,7 @@ router.post('/upload/image', upload.single('image'), async (req, res) => {
 
     console.log('✅ Image uploaded to Cloudinary:', result.secure_url);
 
-    res.json({
+    return res.json({
       url: result.secure_url,
       filename: result.public_id,
       size: result.bytes
@@ -87,7 +87,7 @@ router.post('/upload/image', upload.single('image'), async (req, res) => {
 
   } catch (error) {
     console.error('❌ Cloudinary upload error:', error);
-    res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
+    return res.status(500).json({ error: 'Failed to upload image to Cloudinary' });
   }
 });
 
@@ -99,7 +99,7 @@ router.post('/upload/multiple', upload.array('images', 6), async (req, res) => {
     }
 
     const files = req.files as Express.Multer.File[];
-    const uploadedImages = [];
+    const uploadedImages: { url: string; filename: string; size: number }[] = [];
 
     console.log(`📤 Uploading ${files.length} images to Cloudinary...`);
 
@@ -114,11 +114,11 @@ router.post('/upload/multiple', upload.array('images', 6), async (req, res) => {
     }
 
     console.log(`✅ ${uploadedImages.length} images uploaded to Cloudinary`);
-    res.json(uploadedImages);
+    return res.json(uploadedImages);
 
   } catch (error) {
     console.error('❌ Cloudinary multiple upload error:', error);
-    res.status(500).json({ error: 'Failed to upload images to Cloudinary' });
+    return res.status(500).json({ error: 'Failed to upload images to Cloudinary' });
   }
 });
 
@@ -242,10 +242,10 @@ router.get('/:id', async (req, res) => {
       reviewCount: car._count.reviews
     };
 
-    res.json(carWithRating);
+    return res.json(carWithRating);
   } catch (error) {
     console.error('❌ Error fetching car:', error);
-    res.status(500).json({ error: 'Failed to fetch car' });
+    return res.status(500).json({ error: 'Failed to fetch car' });
   }
 });
 
@@ -327,7 +327,7 @@ router.post('/', async (req, res) => {
     });
 
     console.log(`✅ Car created successfully: ${car.name} (ID: ${car.id})`);
-    res.status(201).json(car);
+    return res.status(201).json(car);
 
   } catch (error) {
     console.error('❌ Error creating car:', error);
@@ -364,13 +364,13 @@ router.post('/', async (req, res) => {
         stack: prismaError.stack
       });
       
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: 'Failed to create car',
         details: process.env.NODE_ENV === 'development' ? prismaError.message : undefined
       });
     } else {
       // Fallback for non-object errors
-      res.status(500).json({ error: 'Failed to create car' });
+      return res.status(500).json({ error: 'Failed to create car' });
     }
   }
 });
@@ -428,15 +428,17 @@ router.delete('/:id', async (req, res) => {
           await cloudinary.uploader.destroy(`jajiautos/cars/${publicId}`);
         } catch (error) {
           console.log('Failed to delete image from Cloudinary:', error);
+          // If you want to stop on error, uncomment the next line:
+          // return res.status(500).json({ error: 'Failed to delete image from Cloudinary' });
         }
       }
     }
 
     await prisma.car.delete({ where: { id: carId } });
-    res.json({ message: 'Car deleted successfully' });
+    return res.json({ message: 'Car deleted successfully' });
   } catch (error) {
     console.error('❌ Error deleting car:', error);
-    res.status(500).json({ error: 'Failed to delete car' });
+    return res.status(500).json({ error: 'Failed to delete car' });
   }
 });
 
